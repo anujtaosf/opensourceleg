@@ -39,7 +39,7 @@ class LordMicrostrainIMU(IMUBase):
     def __init__(
         self,
         tag: str = "LordMicrostrainIMU",
-        port: str = r"/dev/ttyUSB0",
+        port: str = r"/dev/ttyAMA0",
         baud_rate: int = 921600,
         frequency: int = 200,
         update_timeout: int = 500,
@@ -175,12 +175,14 @@ class LordMicrostrainIMU(IMUBase):
         and sets the streaming flag to True.
         """
         try:
+            print(f"Connecting to {self.port} at {self.baud_rate}")
             self._connection = self.mscl.Connection.Serial(os.path.realpath(self.port), self.baud_rate)
         except RuntimeError as e:
             LOGGER.error(f"Failed to connect to the IMU at {self.port}: {e}")
             exit(1)
 
         self._node = self.mscl.InertialNode(self._connection)
+        print("Connected. Setting channel fields...")
         self._node.setActiveChannelFields(self.mscl.MipTypes.CLASS_ESTFILTER, self._configure_mip_channels())
         self._node.enableDataStream(self.mscl.MipTypes.CLASS_ESTFILTER)
         self._is_streaming = True
